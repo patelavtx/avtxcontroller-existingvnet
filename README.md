@@ -38,20 +38,33 @@ Check the 'variables.tf' for the variables that require setting.
 
 
 ```
-# Needed for running init module
-#subnet_id = var.subnet_id
-#subnet_name = var.subnet_name
-enableinit = false                      # if the Terraform deployment environment meets python requirements can run the INIT module
-#vnet_name = var.vnet_name
-#resource_group_name = var.resource_group_name
-
 
 # Needed for build module
 use_existing_vnet = true
-vnet_name = 
-subnet_id = 
-subnet_name =  
-resource_group_name =
+vnet_name           = var.vnet_name
+subnet_id           = var.subnet_id
+subnet_name         = var.subnet_name  
+resource_group_name = var.resource_group_name
+
+
+
+# Additional variables needed for running init module
+enableinit          = false                      # if the Terraform deployment environment meets python requirements can run the INIT module
+
+subnet_id           = var.subnet_id
+subnet_name         = var.subnet_name
+vnet_name           = var.vnet_name
+resource_group_name = var.resource_group_name
+
+directory_id        = var.directory_id 
+subscription_id     = var.subscription_id
+application_id      = var.application_id
+application_key     = var.application_key
+account_email       = var.account_email
+app_name            = var.app_name
+access_account_name = var.access_account_name
+controller_version  = var.controller_version
+aviatrix_customer_id= var.aviatrix_customer_id
 
 ```
 
