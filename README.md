@@ -84,30 +84,6 @@ aviatrix_customer_id= var.aviatrix_customer_id
 
 
 
-## Configuration of variables required if running the 'init' module
-
-```
-variable "directory_id" 
-
-variable "subscription_id" 
- 
-variable "application_id" 
- 
-variable "application_key" 
-
-variable "account_email" 
- 
-variable "app_name" 
-  
-variable "access_account_name" 
-
-variable "controller_version" 
-  
-variable "aviatrix_customer_id" 
- 
-```
-
-
 
 
 ### For copilot deployment set variable:
