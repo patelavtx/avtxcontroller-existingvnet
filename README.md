@@ -51,11 +51,6 @@ resource_group_name = var.resource_group_name
 # Additional variables needed for running init module
 enableinit          = false                      # if the Terraform deployment environment meets python requirements can run the INIT module
 
-subnet_id           = var.subnet_id
-subnet_name         = var.subnet_name
-vnet_name           = var.vnet_name
-resource_group_name = var.resource_group_name
-
 directory_id        = var.directory_id 
 subscription_id     = var.subscription_id
 application_id      = var.application_id
