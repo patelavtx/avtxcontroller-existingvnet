@@ -29,10 +29,11 @@ variable "controller_virtual_machine_size" {
   default     = "Standard_A4_v2"
 }
 
+#  Update
 variable "controller_vnet_cidr" {
   type        = string
   description = "CIDR for controller VNET."
-  default     = ""
+  default     = "10.66.0.0/24"
 }
 
 
@@ -52,8 +53,15 @@ variable "subnet_id" {
   type        = string
   description = ""
   default     = ""
+}
 
 variable "subnet_name" {
+  type        = string
+  description = ""
+  default     = ""
+}
+
+variable "orig_eip" {
   type        = string
   description = ""
   default     = ""
@@ -131,7 +139,7 @@ variable "access_account_name" {
 variable "controller_version" {
   type        = string
   description = "Aviatrix Controller version"
-  default     = ""
+  default     = "6.9"
 }
 
 variable "aviatrix_customer_id" {
@@ -186,4 +194,19 @@ variable "enableinit" {
 variable "enablecop" {
   type        = string
   default = "false"
+}
+
+
+# migrate original eip after associating original ctl eip to new ctl
+variable "use_new_eip" {
+  type        = string
+  default = "true"
+}
+
+
+
+variable "eip_name" {
+  type        = string
+  description = ""
+  default     = ""
 }

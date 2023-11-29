@@ -10,22 +10,33 @@ terraform {
   }
 }
 
+
+/* ***SUMMARY ***
+1. Run build module ;  use_new_eip = true (default)
+2. Post original controller eip association to new controller toggle use_new_eip = false
+3. Comment out eip_name and ensure the name of the original controller eip is updated in *tfvars
+4. Run Plan and Apply to bring original controller EIP state information into new controller EIP state.
+5. Import  RG-VNET-subnet to new controller state, once done, the original controller state and code can be removed (NOTE do NOT destroy)
+(applying destroy will fail as new controller resources will be seen using it, however, best to 'removed' the code and state file)
+*/
+
+
 # Use if making use of outputs to deploy into existing vnet
-/*
+
 data "terraform_remote_state" "orig-ctl" {
   backend = "local"
   config = {
     path = "../orig-azctl/terraform.tfstate"
   }
 }
-*/
 
 
-# Test2
+
+# Test2 - use local module
 module "aviatrix_controller_build" {
-  source  = "AviatrixSystems/azure-controller/aviatrix//modules/aviatrix_controller_build"
-  version = "2.1.0"
-  #source = "./modules/aviatrix_controller_build"
+  #source  = "AviatrixSystems/azure-controller/aviatrix//modules/aviatrix_controller_build"
+  #version = "2.1.0"
+  source = "./aviatrix_controller_build-local"                
   // please do not use special characters such as `\/"[]:|<>+=;,?*@&~!#$%^()_{}'` in the controller_name
   controller_name                           = var.controller_name
   location                                  = var.location
@@ -36,22 +47,40 @@ module "aviatrix_controller_build" {
   controller_virtual_machine_admin_password = var.controller_virtual_machine_admin_password
   controller_virtual_machine_size           = var.controller_virtual_machine_size
   incoming_ssl_cidr                         = var.incoming_ssl_cidr
-  # deploy to existing vnet
-  subnet_id = var.subnet_id
-  subnet_name = var.subnet_name
-  use_existing_vnet = var.use_existing_vnet             # set to true to deploy to existing vnet and add RG-vnet-subnet details
-  vnet_name = var.vnet_name
-  resource_group_name = var.resource_group_name
+  
 
-  #  deploy to existing vnet - use outputs
-  #subnet_id = data.terraform_remote_state.orig-ctl.outputs.controller_subnetid
-  #subnet_name = data.terraform_remote_state.orig-ctl.outputs.controller_subnetname
-  #use_existing_vnet = var.use_existing_vnet
-  #vnet_name = data.terraform_remote_state.orig-ctl.outputs.controller_vnet.name
-  #resource_group_name = data.terraform_remote_state.orig-ctl.outputs.controller_vnet.resource_group_name
+
+  # ***select either deploying via variables or remote state  (a) or (b) comment out either (a) or (b) ***
+  
+  # (a) deploy to existing vnet using variables
+  #subnet_id = var.subnet_id
+  #subnet_name = var.subnet_name
+  #use_existing_vnet = var.use_existing_vnet             # set to true to deploy to existing vnet and add RG-vnet-subnet details
+  #vnet_name = var.vnet_name
+  #resource_group_name = var.resource_group_name
+
+
+  # (b) deploy to existing vnet - use outputs (remote state)
+  subnet_id = data.terraform_remote_state.orig-ctl.outputs.controller_subnetid
+  subnet_name = data.terraform_remote_state.orig-ctl.outputs.controller_subnetname
+  use_existing_vnet = var.use_existing_vnet
+  vnet_name = data.terraform_remote_state.orig-ctl.outputs.controller_vnet.name
+  resource_group_name = data.terraform_remote_state.orig-ctl.outputs.controller_vnet.resource_group_name
+  
+
+
+  # *** AFTER manually migrating the orig IP via Azure Portal set 'use_new_eip = false' , uncomment 'eip_name'and run apply to set STATE***
+
+  # (c) eip setting; setting toggle to false to use original controller ip" ;
+  # use_new_eip = var.use_new_eip
+  # use below to pass to data block when 'use_new_eip = false'
+  use_new_eip = var.use_new_eip
+  eip_name = var.eip_name
 }
 
-#  enableinit = true wil run this module
+
+
+#  setting following variable;  enableinit = true wil run this module
 
 module "aviatrix_controller_initialize" {
   source  = "AviatrixSystems/azure-controller/aviatrix//modules/aviatrix_controller_initialize"
@@ -128,5 +157,37 @@ module "copilot_build_azure" {
     module.aviatrix_controller_build
   ]
 }
+
+
+# add here the rg-vnet-subnet blocks
+
+
+
+# 1. Create an Azure resource group
+resource "azurerm_resource_group" "aviatrix_controller_rg" {
+  location = var.location
+  #name     = "${var.controller_name}-rg"
+  name = "orig-ctl-rg"
+}
+
+
+# 2. Create the Virtual Network and Subnet
+//  Create the Virtual Network
+resource "azurerm_virtual_network" "aviatrix_controller_vnet" {
+  address_space       = [var.controller_vnet_cidr]
+  location            = var.location
+  name                = "orig-ctl-vnet"
+  resource_group_name = azurerm_resource_group.aviatrix_controller_rg.name
+}
+
+
+//  Create the Subnet
+resource "azurerm_subnet" "aviatrix_controller_subnet" {
+  name                 = "orig-ctl-subnet"
+  resource_group_name  = azurerm_resource_group.aviatrix_controller_rg.name
+  virtual_network_name = azurerm_virtual_network.aviatrix_controller_vnet.name
+  address_prefixes     = [var.controller_subnet_cidr]
+}
+
 
 
