@@ -13,23 +13,28 @@ terraform {
 
 /* ***SUMMARY ***
 1. Run build module ;  use_new_eip = true (default)
-2. Post original controller eip association to new controller toggle use_new_eip = false
-3. Comment out eip_name and ensure the name of the original controller eip is updated in *tfvars
-4. Run Plan and Apply to bring original controller EIP state information into new controller EIP state.
-5. Import  RG-VNET-subnet to new controller state, once done, the original controller state and code can be removed (NOTE do NOT destroy)
-(applying destroy will fail as new controller resources will be seen using it, however, best to 'removed' the code and state file)
+2. Post original controller eip association to new controller 
+3. Restore from backup 
+4. Import  RG-VNET-subnet to new controller state, once done, the original controller state and code can be removed (NOTE do NOT destroy)
+5. Comment out eip_name and ensure the name of the original controller eip is updated in *tfvars
+6. Run Plan and Apply to bring original controller EIP state information into new controller EIP state.
+
+Note/.
+(applying destroy on 'old controller'  will fail to remove RG-VNET-SUBNET since the new controller resources will be seen using it
+HOWEVER, extra prudence, manually remove code and state file associated with old contorller.
 */
 
+/* 
+# Use if making use of outputs to deploy into existing vnet ,  use opt(b) below in that case
 
-# Use if making use of outputs to deploy into existing vnet
-
+/*
 data "terraform_remote_state" "orig-ctl" {
   backend = "local"
   config = {
     path = "../orig-azctl/terraform.tfstate"
   }
 }
-
+*/
 
 
 # Test2 - use local module
@@ -52,24 +57,25 @@ module "aviatrix_controller_build" {
 
   # ***select either deploying via variables or remote state  (a) or (b) comment out either (a) or (b) ***
   
-  # (a) deploy to existing vnet using variables
-  #subnet_id = var.subnet_id
-  #subnet_name = var.subnet_name
-  #use_existing_vnet = var.use_existing_vnet             # set to true to deploy to existing vnet and add RG-vnet-subnet details
-  #vnet_name = var.vnet_name
-  #resource_group_name = var.resource_group_name
+  # opt(a) deploy to existing vnet using variables
+  subnet_id = var.subnet_id
+  subnet_name = var.subnet_name
+  use_existing_vnet = var.use_existing_vnet             # set to true to deploy to existing vnet and add RG-vnet-subnet details
+  vnet_name = var.vnet_name
+  resource_group_name = var.resource_group_name
 
 
-  # (b) deploy to existing vnet - use outputs (remote state)
-  subnet_id = data.terraform_remote_state.orig-ctl.outputs.controller_subnetid
-  subnet_name = data.terraform_remote_state.orig-ctl.outputs.controller_subnetname
-  use_existing_vnet = var.use_existing_vnet
-  vnet_name = data.terraform_remote_state.orig-ctl.outputs.controller_vnet.name
-  resource_group_name = data.terraform_remote_state.orig-ctl.outputs.controller_vnet.resource_group_name
+  # opt(b) deploy to existing vnet - use outputs (remote state)
+  #subnet_id = data.terraform_remote_state.orig-ctl.outputs.controller_subnetid
+  #subnet_name = data.terraform_remote_state.orig-ctl.outputs.controller_subnetname
+  #use_existing_vnet = var.use_existing_vnet
+  #vnet_name = data.terraform_remote_state.orig-ctl.outputs.controller_vnet.name
+  #resource_group_name = data.terraform_remote_state.orig-ctl.outputs.controller_vnet.resource_group_name
   
 
 
-  # *** AFTER manually migrating the orig IP via Azure Portal set 'use_new_eip = false' , uncomment 'eip_name'and run apply to set STATE***
+  # *** Use AFTER manually migrating the orig IP; restoring from backup and importing resources; set 'use_new_eip = false' 
+  # *** uncomment 'eip_name'and run apply to set STATE***
 
   # (c) eip setting; setting toggle to false to use original controller ip" ;
   # use_new_eip = var.use_new_eip
@@ -159,10 +165,9 @@ module "copilot_build_azure" {
 }
 
 
-# add here the rg-vnet-subnet blocks
+# Add here the rg-vnet-subnet blocks;  include after 'terraform import'  step4  in SUMMARY above
 
-
-
+/*
 # 1. Create an Azure resource group
 resource "azurerm_resource_group" "aviatrix_controller_rg" {
   location = var.location
@@ -191,3 +196,11 @@ resource "azurerm_subnet" "aviatrix_controller_subnet" {
 
 
 
+//  Create the public ip (original ctl ip)
+resource "azurerm_public_ip" "aviatrix_controller_public_ip" {
+  allocation_method   = "Static"
+  location            = var.location
+  name                = "orig-ctl-public-ip"
+  resource_group_name = azurerm_resource_group.aviatrix_controller_rg.name
+}
+*/

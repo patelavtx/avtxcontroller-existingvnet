@@ -15,7 +15,9 @@
 * Customer ID (license required) - Needed at time of Terraform apply if running 'init module' - Note, this module has python requirements
 
 * Service Principal to add to the 'Access Account' in the Controller - requires 'contributor' at the Azure subscription level.
+
 (https://learn.microsoft.com/en-us/azure/active-directory/develop/howto-create-service-principal-portal)
+
 
 az ad sp create-for-rbac --name myServicePrincipalName \
                          --role contributor \
@@ -47,6 +49,9 @@ subnet_name         = var.subnet_name
 resource_group_name = var.resource_group_name
 
 
+# for STEP2 - AFTER restore and import, toggle 'use_new_eip' by uncommenting the below
+#use_new_eip = "false"                  # first run leave uncommented default is true; use after association of original ctl eip
+eip_name = "orig-ctl-public-ip"      #  Will only be used when 'use_new_eip' is toggled to false; change value to original ctl eip name
 
 # Additional variables needed for running init module
 enableinit          = false                      # if the Terraform deployment environment meets python requirements can run the INIT module
@@ -75,7 +80,7 @@ aviatrix_customer_id= var.aviatrix_customer_id
 3. Change password
 4. Set proxy or skip
 5. Select software version (6.9.latest is fine)
-6. Login and set 'customer_id - license' 
+6. Login and set 'customer_id - license'       <<< no need if restoring from step 6 - 9>>>
 7. Setup 'access account (Azure SP with contributor at Subs level ) - https://read.docs.aviatrix.com/HowTos/Aviatrix_Account_Azure.html
 8. Enable copilot connection if copilot deployed         (not required for controller image update)
 9. Other (setup syslog / netflow if copilot setup)
