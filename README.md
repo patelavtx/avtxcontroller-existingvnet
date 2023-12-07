@@ -9,25 +9,23 @@
 +  Documentation      = [*https://read.docs.aviatrix.com/StartUpGuides/azure-aviatrix-cloud-controller-startup-guide.html*]
 
 
-** Prequisites **:    
 
-```
-* Customer ID (license required) - Needed at time of Terraform apply if running 'init module' - Note, this module has python requirements
-
-* Service Principal to add to the 'Access Account' in the Controller - requires 'contributor' at the Azure subscription level.
-
-(https://learn.microsoft.com/en-us/azure/active-directory/develop/howto-create-service-principal-portal)
+## STEPS for controller image upgrade into existing vnet
 
 
-az ad sp create-for-rbac --name myServicePrincipalName \
-                         --role contributor \
-                         --scopes /subscriptions/mySubscriptionID/resourceGroups/myResourceGroupName
+- ![#c5f015](https://placehold.co/15x15/c5f015/c5f015.png) `1. Deploy new controller  (use_new_eip = true (default))`
+
+- ![#c5f015](https://placehold.co/15x15/c5f015/c5f015.png) `2. Follow the steps to dis-associate/associate EIP and restore from backup (see DOC)`
+   **IMPORTANT to restore using original controller EIP associated as otherwise the Gateway communications may be disrupted as SG rules will not be present**
+
+- ![#c5f015](https://placehold.co/15x15/c5f015/c5f015.png) `3. If environment is stable, (use_new_eip = false)  -   re-apply,  this associates the 'original controller EIP' to the 'new controller' TF code`
+
+- ![#c5f015](https://placehold.co/15x15/c5f015/c5f015.png) `4. Terraform import state -  uncomment lines 169-203 in root module main.tf ;  run through import commands``
 
 
-```
 
 
-## Configuration steps following the Azure controller vm deployment
+## Configuration steps for the Azure controller vm deployment
 
 THIS can deploy both controller/copilot.
 The 'init' module can be enabled/disabled by setting variable 'enableinit' (disabled by default), though 
@@ -71,20 +69,6 @@ aviatrix_customer_id= var.aviatrix_customer_id
 
 
 
-
-** STEPS **
-
-```
-1. Deploy new controller  (use_new_eip = true (default))
-
-2. Follow the steps to dis-associate/associate EIP and restore from backup (see DOC)
-   ****IMPORTANT to restore using original controller EIP associated as otherwise the Gateway communications may be disrupted as SG rules will not be present****
-
-3. If environment is stable, (use_new_eip = false)  -   re-apply,  this associates the 'original controller EIP' to the 'new controller' TF code
-
-4. Terraform import state -  uncomment lines 169-203 in root module main.tf ;  run through import commands
-
-```
 
 
 
