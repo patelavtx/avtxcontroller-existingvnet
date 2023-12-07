@@ -2,11 +2,15 @@
 
 ## Ref
 
-+  Modules referenced - **https://github.com/AviatrixSystems/terraform-aviatrix-azure-controller**
-                      - **https://github.com/AviatrixSystems/terraform-modules-copilot**
++  Modules referenced - 
+**https://github.com/AviatrixSystems/terraform-aviatrix-azure-controller**
+
+**https://github.com/AviatrixSystems/terraform-modules-copilot**
 
 
-+  Documentation      = **https://read.docs.aviatrix.com/StartUpGuides/azure-aviatrix-cloud-controller-startup-guide.html**
+
++  Documentation 
+**https://read.docs.aviatrix.com/StartUpGuides/azure-aviatrix-cloud-controller-startup-guide.html**
 
 
 
