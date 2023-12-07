@@ -13,14 +13,14 @@
 ## STEPS for controller image upgrade into existing vnet
 
 
-- ![#c5f015](https://placehold.co/15x15/c5f015/c5f015.png) `1. Deploy new controller  (use_new_eip = true (default))`
+- [1] ![#c5f015](https://placehold.co/15x15/c5f015/c5f015.png) `Deploy new controller  (use_new_eip = true (default))`
 
-- ![#c5f015](https://placehold.co/15x15/c5f015/c5f015.png) `2. Follow the steps to dis-associate/associate EIP and restore from backup (see DOC)`
+- [2] ![#c5f015](https://placehold.co/15x15/c5f015/c5f015.png) `Follow the steps to dis-associate/associate EIP and restore from backup (see DOC)`
    **IMPORTANT to restore using original controller EIP associated as otherwise the Gateway communications may be disrupted as SG rules will not be present**
 
-- ![#c5f015](https://placehold.co/15x15/c5f015/c5f015.png) `3. If environment is stable, (use_new_eip = false)  -   re-apply,  this associates the 'original controller EIP' to the 'new controller' TF code`
+- [3] ![#c5f015](https://placehold.co/15x15/c5f015/c5f015.png) `If environment is stable, (use_new_eip = false)  -   re-apply,  this associates the 'original controller EIP' to the 'new controller' TF code`
 
-- ![#c5f015](https://placehold.co/15x15/c5f015/c5f015.png) `4. Terraform import state -  uncomment lines 169-203 in root module main.tf ;  run through import commands``
+- [4] ![#c5f015](https://placehold.co/15x15/c5f015/c5f015.png) `Terraform import state -  uncomment lines 169-203 in root module main.tf ;  run through import commands`
 
 
 
