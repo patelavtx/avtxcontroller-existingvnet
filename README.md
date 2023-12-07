@@ -1,4 +1,4 @@
-# Azure Controller deployment via Terraform Cloud
+# For azure Controller Image Update deployment via Terraform Cloud
 
 ## Ref
 
@@ -72,18 +72,17 @@ aviatrix_customer_id= var.aviatrix_customer_id
 
 
 
-**If 'init' module not run the following needs to be done post deployment**
+** STEPS **
 
 ```
-1. Login initially using private ip as password
-2. Set email address
-3. Change password
-4. Set proxy or skip
-5. Select software version (6.9.latest is fine)
-6. Login and set 'customer_id - license'       <<< no need if restoring from step 6 - 9>>>
-7. Setup 'access account (Azure SP with contributor at Subs level ) - https://read.docs.aviatrix.com/HowTos/Aviatrix_Account_Azure.html
-8. Enable copilot connection if copilot deployed         (not required for controller image update)
-9. Other (setup syslog / netflow if copilot setup)
+1. Deploy new controller  (use_new_eip = true (default))
+
+2. Follow the steps to dis-associate/associate EIP and restore from backup (see DOC)
+   ****IMPORTANT to restore using original controller EIP associated as otherwise the Gateway communications may be disrupted as SG rules will not be present****
+
+3. If environment is stable, (use_new_eip = false)  -   re-apply,  this associates the 'original controller EIP' to the 'new controller' TF code
+
+4. Terraform import state -  uncomment lines 169-203 in root module main.tf ;  run through import commands
 
 ```
 
@@ -111,17 +110,3 @@ terraform apply
 ```
 
 
-
-
-##  Example of Workspace variables and variable set
-
-![Architecture](https://github.com/patelavtx/LabShare/blob/main/AzCtrl-TFCvars.PNG)
-
-
-![Architecture](https://github.com/patelavtx/LabShare/blob/main/AzCtrl-TFCvarset.PNG)
-
-
-
-##  Example of Resulting Terraform plan
-
-![Architecture](https://github.com/patelavtx/LabShare/blob/main/AzCtrl-TFplan.PNG)

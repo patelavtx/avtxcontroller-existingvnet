@@ -13,11 +13,10 @@ terraform {
 
 /* ***SUMMARY ***
 1. Run build module ;  use_new_eip = true (default)
-2. Post original controller eip association to new controller 
-3. Restore from backup 
-4. Import  RG-VNET-subnet to new controller state, once done, the original controller state and code can be removed (NOTE do NOT destroy)
-5. Comment out eip_name and ensure the name of the original controller eip is updated in *tfvars
-6. Run Plan and Apply to bring original controller EIP state information into new controller EIP state.
+2. Post original controller eip association to new controller,restore from backup 
+3. Import  RG-VNET-subnet-EIP to new controller state, once done, the original controller state and code can be removed (NOTE do NOT destroy)
+4. Comment out eip_name and ensure the name of the original controller eip is updated in *tfvars
+5. Run Plan and Apply to bring original controller EIP state information into new controller EIP state.
 
 Note/.
 (applying destroy on 'old controller'  will fail to remove RG-VNET-SUBNET since the new controller resources will be seen using it
@@ -54,8 +53,7 @@ module "aviatrix_controller_build" {
   incoming_ssl_cidr                         = var.incoming_ssl_cidr
   
 
-
-  # ***select either deploying via variables or remote state  (a) or (b) comment out either (a) or (b) ***
+  # ***select either deploying via variables (a) or remote state (b) comment out either (a) or (b) ***
   
   # opt(a) deploy to existing vnet using variables
   subnet_id = var.subnet_id
@@ -77,9 +75,9 @@ module "aviatrix_controller_build" {
   # *** Use AFTER manually migrating the orig IP; restoring from backup and importing resources; set 'use_new_eip = false' 
   # *** uncomment 'eip_name'and run apply to set STATE***
 
-  # (c) eip setting; setting toggle to false to use original controller ip" ;
+  # (c) eip setting;  DEFAULT is set to 'true'; toggle to false to use original controller ip" ;
   # use_new_eip = var.use_new_eip
-  # use below to pass to data block when 'use_new_eip = false'
+  # use below to pass to original eip name when 'use_new_eip = false'
   use_new_eip = var.use_new_eip
   eip_name = var.eip_name
 }
@@ -165,9 +163,9 @@ module "copilot_build_azure" {
 }
 
 
-# Add here the rg-vnet-subnet blocks;  include after 'terraform import'  step4  in SUMMARY above
-
+# Uncomment  out once ready to IMPORT  (step3) in SUMMARY above
 /*
+
 # 1. Create an Azure resource group
 resource "azurerm_resource_group" "aviatrix_controller_rg" {
   location = var.location
@@ -176,7 +174,7 @@ resource "azurerm_resource_group" "aviatrix_controller_rg" {
 }
 
 
-# 2. Create the Virtual Network and Subnet
+# 2. Create the Virtual Network
 //  Create the Virtual Network
 resource "azurerm_virtual_network" "aviatrix_controller_vnet" {
   address_space       = [var.controller_vnet_cidr]
@@ -185,7 +183,7 @@ resource "azurerm_virtual_network" "aviatrix_controller_vnet" {
   resource_group_name = azurerm_resource_group.aviatrix_controller_rg.name
 }
 
-
+# 3. Create the  Subnet
 //  Create the Subnet
 resource "azurerm_subnet" "aviatrix_controller_subnet" {
   name                 = "orig-ctl-subnet"
@@ -195,7 +193,7 @@ resource "azurerm_subnet" "aviatrix_controller_subnet" {
 }
 
 
-
+# 4. Create the public ip
 //  Create the public ip (original ctl ip)
 resource "azurerm_public_ip" "aviatrix_controller_public_ip" {
   allocation_method   = "Static"
